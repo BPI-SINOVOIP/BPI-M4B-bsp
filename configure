@@ -20,7 +20,7 @@ U_CROSS_COMPILE=$TOPDIR/toolchains/$U_TOOLCHAIN/bin
 K_CROSS_COMPILE=$TOPDIR/toolchains/$K_TOOLCHAIN/bin
 
 list_boards() {
-	for chipdir in $(find sunxi-pack/ -mindepth 1 -maxdepth 1 -type d) ;
+	for chipdir in $(find sunxi-pack/ -mindepth 1 -maxdepth 1 -type d | grep "sun50") ;
 	do
 	    packchip=`basename ${chipdir}`
 	    echo "${packchip}"

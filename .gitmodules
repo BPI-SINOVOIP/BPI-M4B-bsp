@@ -1,0 +1,8 @@
+[submodule "u-boot-sunxi"]
+	path = u-boot-sunxi
+	url = https://github.com/Dangku/sunxi-u-boot
+	branch = sun50iw9-v2018.05
+[submodule "linux-sunxi"]
+	path = linux-sunxi
+	url = https://github.com/Dangku/sunxi-linux
+	branch = sun50iw9-5.4

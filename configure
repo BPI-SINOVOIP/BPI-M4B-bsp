@@ -1,0 +1,122 @@
+#!/bin/bash
+
+set -e
+
+TOPDIR=`pwd`
+
+MACH=
+BOARD=
+ARCH=
+uboot_config=
+kernel_dtb=
+kernel_config=
+kernel_modules=
+kernel_headers=
+
+U_TOOLCHAIN=gcc-linaro-7.4.1-2019.02-x86_64_arm-linux-gnueabi
+#U_TOOLCHAIN=gcc-arm-11.2-2022.02-x86_64-aarch64-none-linux-gnu
+K_TOOLCHAIN=gcc-arm-11.2-2022.02-x86_64-aarch64-none-linux-gnu
+U_CROSS_COMPILE=$TOPDIR/toolchains/$U_TOOLCHAIN/bin
+K_CROSS_COMPILE=$TOPDIR/toolchains/$K_TOOLCHAIN/bin
+
+list_boards() {
+	for chipdir in $(find sunxi-pack/ -mindepth 1 -maxdepth 1 -type d) ;
+	do
+	    packchip=`basename ${chipdir}`
+	    echo "${packchip}"
+	    for boarddir in $(find sunxi-pack/${packchip} -mindepth 1 -maxdepth 1 -type d | grep "bpi") ;
+	    do
+		packboard=`basename ${boarddir}`
+		echo "    ${packboard}"
+	    done
+	done
+}
+
+# keep the output `sh` friendly
+# i.e., no spaces around the '='
+generate_board_mk() {
+	
+	cat <<-EOT
+	MACH=$MACH
+	ARCH=$ARCH
+	BOARD=$BOARD
+	U_COMPILE_TOOL=$U_CROSS_COMPILE
+	K_COMPILE_TOOL=$K_CROSS_COMPILE
+	UBOOT_CONFIG=$uboot_config
+	KERNEL_CONFIG=$kernel_config
+	EOT
+
+}
+
+
+generate_board_envsh() {
+	
+	cat <<-EOT
+	export MACH=$MACH
+	export ARCH=$ARCH
+	export BOARD=$BOARD
+	export UBOOT_CONFIG=$uboot_config
+	export KERNEL_DTB="$kernel_dtb"
+	export KERNEL_CONFIG=$kernel_config
+	export KERNEL_MODULES=${kernel_modules}
+	export KERNEL_HEADERS=${kernel_headers}
+	export TOPDIR=${TOPDIR}
+	EOT
+
+}
+
+usage() {
+	cat <<-EOT >&2
+
+	supported boards:
+	EOT
+	list_boards
+}
+
+if [ $# -eq 0 ]; then
+	usage
+	exit 1
+fi
+
+BOARD=$1
+case $BOARD in
+	bpi-m4berry)
+		MACH=sun50iw9
+		ARCH=arm64
+		BOARD=bpi-m4berry
+		uboot_config=bananapi_m4berry_defconfig
+		kernel_dtb="sun50i-h616-bananapi-m4berry"
+		kernel_config=bananapi_m4berry_defconfig
+		kernel_modules="5.4.125"
+		kernel_headers="linux-headers-5.4.125"
+		;;
+	bpi-m4zero)
+		MACH=sun50iw9
+		ARCH=arm64
+		BOARD=bpi-m4zero
+		uboot_config=bananapi_m4zero_defconfig
+		kernel_dtb="sun50i-h616-bananapi-m4zero"
+		kernel_config=bananapi_m4zero_defconfig
+		kernel_modules="5.4.125"
+		kernel_headers="linux-headers-5.4.125"
+		;;
+	*)
+		echo -e "\033[31mboard ${BOARD} is not support\033[0m"
+		exit 1
+		;;
+esac
+
+if [ ! -d ${TOPDIR}/sunxi-pack/${MACH}/${BOARD} ]; then
+	echo -e "\033[31mboard ${BOARD} is not support\033[0m"
+	usage
+fi
+
+if [ -e env.sh ]; then
+	rm env.sh
+fi
+generate_board_envsh "$1" > env.sh
+
+if [ -e chosen_board.mk ]; then
+        rm chosen_board.mk
+fi
+generate_board_mk "$1" > chosen_board.mk

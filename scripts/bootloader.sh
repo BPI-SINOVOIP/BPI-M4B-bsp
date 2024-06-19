@@ -15,6 +15,7 @@ if [ ! -z $O ] ; then
 fi
 
 UBOOT=${TOPDIR}/u-boot-sunxi
+LINUX=${TOPDIR}/linux-sunxi
 BIN=${TOPDIR}/sunxi-pack/common/bin
 TOOLS=${TOPDIR}/sunxi-pack/common/tools
 CONFIG=${TOPDIR}/sunxi-pack/${MACH}/${BOARD}
@@ -27,7 +28,7 @@ uboot_custom()
         export PATH=${TOOLS}:$PATH
         cp ${BIN}/* ${PACK}/
         cp ${CONFIG}/sys_config.fex ${PACK}/
-        cp ${CONFIG}/u-boot.dts ${PACK}/
+	cp ${LINUX}/arch/arm64/boot/dts/sunxi/${KERNEL_DTB}.dts ${PACK}/u-boot.dts
         cp ${UBOOT}/u-boot.bin ${PACK}/u-boot.fex
 
 	cd ${PACK}
